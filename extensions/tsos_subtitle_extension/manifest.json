@@ -1,0 +1,41 @@
+{
+    "manifest_version": 3,
+    "name": "字幕救星插件",
+    "description": "字幕救星插件-为在线视频生成字幕",
+    "version": "1.0",
+    "action": {
+      "default_popup": "index.html",
+      "default_icon": "default_icon.png"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [  "views/settings/index.html","images/*" ],
+            "matches": ["https://www.youtube.com/*"]
+          }
+    ],
+    "background": {
+        "service_worker": "background.js"
+      },
+      "permissions": [
+        "activeTab",
+        "scripting",
+        "storage"
+      ],
+      "options_page": "views/settings/index.html",
+      "host_permissions": [
+        "http://127.0.0.1:5000/*"
+      ],
+
+
+    "content_scripts":[
+        {
+        "js":["scripts/youtube.js"],
+        "matches": [
+            "https://www.youtube.com/*"
+          ],
+          "css": [
+            "scripts/style.css"
+          ]
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+.sub {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    bottom: 2%;
+    cursor: pointer;
+
+    z-index: 999;
+}
+
+.tsos-sub-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    z-index: 2;
+}
+
+.empty {
+    display: none;
+}
+
+.tsos-settings {
+    border: none;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+.tsos-settings img{
+    width: 60%;
+
+}
+.display {
+    display: none;
+}
+
+.tsos-settings iframe {
+    position: absolute;
+    top: 20px;
+    inset: auto 0px 120% auto;
+    border: 0px;
+    z-index: 1110;
+    overflow: hidden;
+    background-color: transparent;
+    opacity: 1;
+    transition: all 0.25s ease 0s;
+    height: 217px;
+    width: 338px;
+}
