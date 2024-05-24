@@ -14,7 +14,7 @@
     top: 0;
     left: 0;
 
-    z-index: 2;
+    z-index: 20;
 }
 
 .empty {
@@ -34,6 +34,22 @@
 .display {
     display: none;
 }
+
+.tsos-notification{
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 260px;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2%;
+    box-sizing: border-box;
+    transition: all 0.5s ease;
+}
+
 
 .tsos-settings iframe {
     position: absolute;

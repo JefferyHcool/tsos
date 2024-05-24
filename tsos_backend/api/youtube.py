@@ -118,6 +118,7 @@ class YoutubeAPI:
                     audio_file = self.get_audio_from_video()
                     subtitle_content = transcriptions(audio_file)
                     subtitle_content=srt.compose(subtitle_content)
+                    print(subtitle_content)
                     return subtitle_content
                 result = ydl.extract_info(url, download=False)
 
@@ -180,10 +181,16 @@ class YoutubeAPI:
 
     def get_audio_from_video(self, video_id=None):
         url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
+        export_path = self.base_path + '/audios/'
+        if not os.path.exists(export_path):
+            print('不存在')
+            os.makedirs(os.path.dirname(export_path))
+
+        export_path = export_path + sanitize_filename(f"{self.video_info['title'] }")
         ydl_opts = {
             'proxy': self.proxy,
             'format': 'bestaudio/best',  # 只下载最佳音频格式
-            'outtmpl': '%(id)s.%(ext)s',  # 使用视频 ID 作为文件名
+            'outtmpl': export_path,  # 使用视频 ID 作为文件名
             'nooverwrites': True,
             'postprocessors': [{  # 使用 FFmpeg 将音频转换为 mp3 格式
                 'key': 'FFmpegExtractAudio',
@@ -195,7 +202,8 @@ class YoutubeAPI:
             try:
                 result = ydl.extract_info(url, download=True)
                 audio_file = ydl.prepare_filename(result).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-                return audio_file
+                print(audio_file)
+                return audio_file+'.mp3'
             except yt_dlp.utils.DownloadError as e:
                 print(f"Error: {e}")
                 return None

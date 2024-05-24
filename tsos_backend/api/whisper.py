@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 import srt
 import openai
 from openai import OpenAI
@@ -51,6 +51,7 @@ def transcribe_chunk(file_name, start_time):
         )
     # 解析字幕并添加时间戳
     subtitles = []
+
     for i, subtitle in enumerate(srt.parse(transcription)):
         start = timedelta(seconds=subtitle.start.total_seconds() + start_time / 1000)
         end = timedelta(seconds=subtitle.end.total_seconds() + start_time / 1000)
@@ -75,3 +76,11 @@ def transcriptions(path):
     return transcription_list
 
 
+if __name__ == '__main__':
+    now=datetime.now()
+    path_to_large_audio = "../S1Fplr8nVHQ.mp3"
+    all_subtitles = transcriptions(path_to_large_audio)
+    # 结束计时
+    later = datetime.now()
+    print('Final Time:', later - now)
+    print(all_subtitles)
