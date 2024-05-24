@@ -24,8 +24,7 @@ function getVideoPlayer() {
 function setSubtitle(title, content) {
     if (!content) {
         title.classList.add('empty');
-    }
-    else {
+    } else {
         title.classList.remove('empty');
         title.textContent = `${content || ''}`;
     }
@@ -34,8 +33,6 @@ function setSubtitle(title, content) {
 function handleDrag(e) {
     e.preventDefault();
     let subtitle = document.querySelector('#tsos-subtitle');
-    let x = e.clientX;
-    let y = e.clientY;
     offsetX = e.clientX - subtitle.offsetLeft;
     offsetY = e.clientY - subtitle.offsetTop;
     document.addEventListener('mousemove', onMouseMove);
@@ -55,38 +52,28 @@ function onMouseUp() {
 
 function startSubtitleStream(videoUrl, lang) {
     let flag = 0;
-    // Send a POST request to start the subtitle generation process
     fetch('http://127.0.0.1:5000/youtube/get_srt', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',  // 确保请求中包含会话 Cookie
         body: JSON.stringify({ video_url: videoUrl, lang: lang })
     })
         .then(response => {
             if (response.ok) {
-                // If the request is successful, open an EventSource to the same endpoint
                 const eventSource = new EventSource('http://127.0.0.1:5000/youtube/get_srt_stream');
 
                 eventSource.onmessage = function (event) {
                     const subtitle = JSON.parse(event.data);
-                    // Display the subtitle on the page
                     console.log('Subtitle:', subtitle);
                     if (flag == 0) {
                         const notification = document.querySelector('.tsos-notification');
                         notification.style.display = 'block';
-                        setTimeout(() => {
-                            notification.style.display = 'none';
-
-                        }, 2000);
+                        setTimeout(() => { notification.style.display = 'none'; }, 2000);
                         flag = -1;
                     }
                     cacheSubtitles(subtitles);
 
                     subtitles.push(...subtitle);
-                    // let subtitleElement = document.querySelector('#tsos-subtitle');
-                    // setSubtitle(subtitleElement, subtitle); 
                 };
 
                 eventSource.onerror = function (err) {
@@ -99,11 +86,12 @@ function startSubtitleStream(videoUrl, lang) {
         })
         .catch(error => console.error('Error:', error));
 }
+
 function parseTime(timeString) {
     const parts = timeString.split(':');
-    const seconds = parts.reduce((acc, part) => acc * 60 + parseFloat(part.replace(',', '.')), 0);
-    return seconds;
+    return parts.reduce((acc, part) => acc * 60 + parseFloat(part.replace(',', '.')), 0);
 }
+
 function cacheSubtitles(subtitles) {
     const videoUrl = getVideoUrl();
     console.log('Attempting to cache subtitles for', videoUrl);
@@ -118,7 +106,6 @@ function cacheSubtitles(subtitles) {
     });
 }
 
-
 function getCurrentSubtitle(currentTime) {
     return subtitles.find(subtitle => {
         const start = parseTime(subtitle.start);
@@ -129,7 +116,6 @@ function getCurrentSubtitle(currentTime) {
 
 function showSettings() {
     const iframe = document.getElementById('tsos-settings-iframe');
-
     iframe.style.display = iframe.style.display === 'none' ? 'block' : 'none';
     console.log(iframe);
 }
@@ -153,30 +139,121 @@ function isCacheExist(videoUrl) {
     });
 }
 
+function setFontSize(fontSize) {
+    const subtitle = document.getElementById('tsos-subtitle');
+    if (subtitle) {
+        subtitle.style.fontSize = `${fontSize}px`;
+    }
+}
 
-
-function setup() {
-    chrome.storage.sync.get('activated', function (data) {
-        isChecked = data.activated;
-    });
-
-    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-        if (request.message === "activate") {
-            console.log("Activate message received, state:", request.state);
-            // 执行你的处理逻辑
-            if (request.state) {
-                // 激活状态的处理逻辑
+function setupStorageListeners() {
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'sync' && changes.activated) {
+            isChecked = changes.activated.newValue;
+            if (isChecked) {
                 activate();
                 setIcon(true);
-                console.log("激活状态处理逻辑");
             } else {
-                // 非激活状态的处理逻辑
                 deactivate();
                 setIcon(false);
-                console.log("非激活状态处理逻辑");
+            }
+        }
+    });
+
+    chrome.storage.sync.get('font_size', function (data) {
+        const fontSize = data.font_size || 16;
+        const subtitle = document.getElementById('tsos-subtitle');
+        if (subtitle) {
+            setFontSize(fontSize);
+        } else {
+            // 使用 MutationObserver 监听 subtitle 元素的创建
+            const observer = new MutationObserver((mutations, obs) => {
+                const subtitle = document.getElementById('tsos-subtitle');
+                if (subtitle) {
+                    setFontSize(fontSize);
+                    obs.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    });
+
+    chrome.storage.sync.get('font_color', function (data) {
+        const font_color = data.font_color || '#FFFFFF';
+        const subtitle = document.getElementById('tsos-subtitle');
+        if (subtitle) {
+            subtitle.style.color = font_color;
+        }
+        else {
+            // 使用 MutationObserver 监听 subtitle 元素的创建
+            const observer = new MutationObserver((mutations, obs) => {
+                const subtitle = document.getElementById('tsos-subtitle');
+                if (subtitle) {
+                    subtitle.style.color = font_color;
+                    obs.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    });
+}
+function setFontColor(font_color) {
+    const subtitle = document.getElementById('tsos-subtitle');
+    if (subtitle) {
+        subtitle.style.color = font_color;
+    }
+}
+
+
+function setupMessageListeners() {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.message === "activate") {
+            if (request.state) {
+                activate();
+                setIcon(true);
+            } else {
+                deactivate();
+                setIcon(false);
             }
             sendResponse({ reply: "Message received and handled" });
         }
+
+        if (request.action === 'setFont' && request.fontSize) {
+            const fontSize = request.fontSize;
+            const subtitle = document.getElementById('tsos-subtitle');
+            if (subtitle) {
+                setFontSize(fontSize);
+            } else {
+                // 使用 MutationObserver 监听 subtitle 元素的创建
+                const observer = new MutationObserver((mutations, obs) => {
+                    const subtitle = document.getElementById('tsos-subtitle');
+                    if (subtitle) {
+                        setFontSize(fontSize);
+                        obs.disconnect();
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        }
+        if (request.action === 'setFontColor' && request.color) {
+            const subtitle = document.getElementById('tsos-subtitle');
+            if (subtitle) {
+                setFontColor(request.color);
+            }
+            else {
+                // 使用 MutationObserver 监听 subtitle 元素的创建
+                const observer = new MutationObserver((mutations, obs) => {
+                    const subtitle = document.getElementById('tsos-subtitle');
+                    if (subtitle) {
+                        setFontColor(request.color);
+                        obs.disconnect();
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        }
+
+
     });
 }
 
@@ -185,7 +262,7 @@ function setIcon(state) {
     icon.src = chrome.runtime.getURL(state ? "images/sub_icon_activated.png" : "images/sub_icon.png");
 }
 
-function initPage() {
+function createDOMElements() {
     const iframe = document.createElement('iframe');
     const container = document.createElement('div');
     const icon = document.createElement('img');
@@ -210,84 +287,54 @@ function initPage() {
 
 function activate() {
     const sub_container = document.createElement("div");
-    console.log(getVideoUrl());
-
-    const videoUrl = getVideoUrl();
-    
     const title = document.createElement("span");
     sub_container.appendChild(title);
     sub_container.classList = 'tsos-sub-container ytp-player-content ytp-iv-player-content';
     title.classList = "sub";
     title.id = "tsos-subtitle";
     title.addEventListener("mousedown", handleDrag);
-    const video = getVideoPlayer();
     video_container.insertBefore(sub_container, video_container.firstChild);
 
-    isCacheExist(videoUrl)
-    .then(result => {
-        if (result.exists) {
-            console.log('Cache exists for', videoUrl);
-            subtitles = result.data;
-            console.log('Cached Subtitles:', subtitles);
-        } else {
-            console.log('Cache does not exist for', videoUrl);
-            subtitles = [];
-            startSubtitleStream(getVideoUrl(), null);
-            // 处理缓存不存在的逻辑
-        }
-    })
-    .catch(error => {
-        console.error('Error checking cache:', error);
-    });
+    const videoUrl = getVideoUrl();
 
+    isCacheExist(videoUrl)
+        .then(result => {
+            if (result.exists) {
+                subtitles = result.data;
+            } else {
+                subtitles = [];
+                startSubtitleStream(videoUrl, null);
+            }
+        })
+        .catch(error => console.error('Error checking cache:', error));
+
+    const video = getVideoPlayer();
     if (video) {
         video.addEventListener('timeupdate', () => {
-            console.log('Current time:', video.currentTime);
             const currentTime = video.currentTime;
-            console.log(subtitles);
             const currentSubtitle = getCurrentSubtitle(currentTime);
-            console.log(currentSubtitle);
-            setSubtitle(title, currentSubtitle?.text);
+            setSubtitle(title, currentSubtitle ? currentSubtitle.text : '');
         });
     }
 }
 
-function observeUrlChange() {
-    let lastUrl = window.location.href;
-    
-    const observer = new MutationObserver(() => {
-        const currentUrl = window.location.href;
-        if (currentUrl !== lastUrl) {
-            lastUrl = currentUrl;
-            console.log('URL changed to:', currentUrl);
-            deactivate();
+function deactivate() {
+    const container = document.querySelector(".tsos-sub-container");
+    if (container) container.remove();
+    subtitles = [];
+}
+
+function init() {
+    setupStorageListeners();
+    setupMessageListeners();
+    createDOMElements();
+    chrome.storage.sync.get('activated', function (data) {
+        isChecked = data.activated || false;
+        if (isChecked) {
             activate();
         }
+        setIcon(isChecked);
     });
-
-    const config = { subtree: true, childList: true };
-    observer.observe(document.body, config);
-
-
 }
 
-function deactivate() {
-    const subtitle = document.querySelector('#tsos-subtitle');
-    if (subtitle) {
-        subtitle.remove();
-    }
-    subtitles = [];
-    const video = getVideoPlayer();
-    if (video) {
-        video.removeEventListener('timeupdate', () => {});
-    }
-}
-
-async function main() {
-    await setup();
-    initPage();
-    observeUrlChange();
-    console.log("开始执行 TSOS 插件");
-}
-
-main();
+init();

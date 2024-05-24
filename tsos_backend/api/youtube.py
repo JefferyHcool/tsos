@@ -8,7 +8,7 @@ import os
 from tsos_backend.api.ffmpeg import embed_subtitles
 from tsos_backend.api.gpt import translation
 from tsos_backend.api.whisper import transcriptions
-from tsos_backend.utils import sanitize_filename
+from tsos_backend.utils import sanitize_filename, split_srt
 
 load_dotenv()
 
@@ -18,6 +18,8 @@ class YoutubeAPI:
         self.video_quality = None
         self.proxy = os.getenv("PROXY", None)
         self.video_id = str(video_url).split('watch?v=')[1]
+        if '&' in self.video_id:
+            self.video_id = self.video_id.split('&')[0]
         self.base_path = os.getenv('ASSETS_FOLDER')
         self.ydl = yt_dlp.YoutubeDL({
             'writesubtitles': True,
@@ -119,6 +121,7 @@ class YoutubeAPI:
                     subtitle_content = transcriptions(audio_file)
                     subtitle_content=srt.compose(subtitle_content)
                     print(subtitle_content)
+                    split_srt(subtitle_content)
                     return subtitle_content
                 result = ydl.extract_info(url, download=False)
 
