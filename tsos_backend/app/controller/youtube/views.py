@@ -63,6 +63,7 @@ def get_srt_stream():
         for subtitle_chunk in subtitles_list:
             translated_subtitles = translation(subtitle_chunk, extra_info=f'视频名称{youtube.video_info["title"]}')
             subtitle_objects = parse_srt(translated_subtitles)
+            subtitle_file = youtube.save_srt_to_file(translated_subtitles)
             yield f"data: {json.dumps(subtitle_objects)}\n\n"
         yield "event: end\n"  # Indicate the end of the stream
         yield "data: END\n\n"

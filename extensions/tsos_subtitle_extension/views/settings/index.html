@@ -1,141 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
 
-  <style>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: pointer;
+            background: transparent;
+            min-width: 0;
+        }
 
-   body {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    cursor: pointer;
-    background: transparent;
-    min-width: 0;
-}
-html, body {
+        html,
+        body {
             height: 100%;
             margin: 0;
             padding: 0;
             width: 100%;
         }
 
-   #root {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    font-size: 16px;
-    background-color: rgba(27, 28, 29, 0.9);
-    color: white;
-}
-.settings-container{
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 12px;
-    
-}
-.settings-item{
-    display: flex;
-    justify-content: space-between;
-}
-.settings-item-title{
-    font-size: 20px;
-}
-.color-box{
-    display: flex;
-    gap: 5px;
+        #root {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: rgba(27, 28, 29, 0.9);
+            color: white;
+        }
 
-}
+        .settings-container {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 12px;
+
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .settings-item-title {
+            font-size: 20px;
+        }
+
+        .color-box {
+            display: flex;
+            gap: 5px;
+
+        }
 
 
-.color{
+        .color {
 
-width: 20px;
-height: 20px;
-border-radius: 50%;
-}
-.balck{
-    background-color: #000;
-}
-.white{
-    background-color: #fff;
-}
-.yellow{
-    background-color: #ffd700;
-}
-.blue{
-    background-color: #00bfff;
-}
-.green{
-    background-color: #32cd32;
-}
-.select{
-    border: 2px solid #949393 ;
-}
-.switch {
- --button-width: 2.5em;
- --button-height: 1.5em;
- --toggle-diameter: 1.2em;
- --button-toggle-offset: calc((var(--button-height) - var(--toggle-diameter)) / 2);
- --toggle-shadow-offset: 10px;
- --toggle-wider: 3em;
- --color-grey: #cccccc;
- --color-green: #4296f4;
-}
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
 
-.slider {
- display: inline-block;
- width: var(--button-width);
- height: var(--button-height);
- background-color: var(--color-grey);
- border-radius: calc(var(--button-height) / 2);
- position: relative;
- transition: 0.3s all ease-in-out;
-}
+        .balck {
+            background-color: #000;
+            border: #949393;
 
-.slider::after {
- content: "";
- display: inline-block;
- width: var(--toggle-diameter);
- height: var(--toggle-diameter);
- background-color: #fff;
- border-radius: calc(var(--toggle-diameter) / 2);
- position: absolute;
- top: var(--button-toggle-offset);
- transform: translateX(var(--button-toggle-offset));
- box-shadow: var(--toggle-shadow-offset) 0 calc(var(--toggle-shadow-offset) * 4) rgba(0, 0, 0, 0.1);
- transition: 0.3s all ease-in-out;
-}
+        }
 
-.switch input[type="checkbox"]:checked + .slider {
- background-color: var(--color-green);
-}
+        .white {
+            background-color: #fff;
+            border: #000;
+        }
 
-.switch input[type="checkbox"]:checked + .slider::after {
- transform: translateX(calc(var(--button-width) - var(--toggle-diameter) - var(--button-toggle-offset)));
- box-shadow: calc(var(--toggle-shadow-offset) * -1) 0 calc(var(--toggle-shadow-offset) * 4) rgba(0, 0, 0, 0.1);
-}
+        .yellow {
+            background-color: #ffd700;
+            border: #949393;
 
-.switch input[type="checkbox"] {
- display: none;
-}
+        }
 
-.switch input[type="checkbox"]:active + .slider::after {
- width: var(--toggle-wider);
-}
+        .blue {
+            background-color: #00bfff;
+            border: #949393;
 
-.switch input[type="checkbox"]:checked:active + .slider::after {
- transform: translateX(calc(var(--button-width) - var(--toggle-wider) - var(--button-toggle-offset)));
-}
+        }
 
-  </style>
+        .green {
+            background-color: #32cd32;
+            border: #949393;
+        }
+
+        .select {
+            border: 2px solid ;
+        }
+
+        .switch {
+            --button-width: 2.5em;
+            --button-height: 1.5em;
+            --toggle-diameter: 1.2em;
+            --button-toggle-offset: calc((var(--button-height) - var(--toggle-diameter)) / 2);
+            --toggle-shadow-offset: 10px;
+            --toggle-wider: 3em;
+            --color-grey: #cccccc;
+            --color-green: #4296f4;
+        }
+
+        .slider {
+            display: inline-block;
+            width: var(--button-width);
+            height: var(--button-height);
+            background-color: var(--color-grey);
+            border-radius: calc(var(--button-height) / 2);
+            position: relative;
+            transition: 0.3s all ease-in-out;
+        }
+
+        .slider::after {
+            content: "";
+            display: inline-block;
+            width: var(--toggle-diameter);
+            height: var(--toggle-diameter);
+            background-color: #fff;
+            border-radius: calc(var(--toggle-diameter) / 2);
+            position: absolute;
+            top: var(--button-toggle-offset);
+            transform: translateX(var(--button-toggle-offset));
+            box-shadow: var(--toggle-shadow-offset) 0 calc(var(--toggle-shadow-offset) * 4) rgba(0, 0, 0, 0.1);
+            transition: 0.3s all ease-in-out;
+        }
+
+        .switch input[type="checkbox"]:checked+.slider {
+            background-color: var(--color-green);
+        }
+
+        .switch input[type="checkbox"]:checked+.slider::after {
+            transform: translateX(calc(var(--button-width) - var(--toggle-diameter) - var(--button-toggle-offset)));
+            box-shadow: calc(var(--toggle-shadow-offset) * -1) 0 calc(var(--toggle-shadow-offset) * 4) rgba(0, 0, 0, 0.1);
+        }
+
+        .switch input[type="checkbox"] {
+            display: none;
+        }
+
+        .switch input[type="checkbox"]:active+.slider::after {
+            width: var(--toggle-wider);
+        }
+
+        .switch input[type="checkbox"]:checked:active+.slider::after {
+            transform: translateX(calc(var(--button-width) - var(--toggle-wider) - var(--button-toggle-offset)));
+        }
+    </style>
 </head>
+
 <body>
     <div id="root">
         <div class="settings-container">
@@ -145,58 +166,71 @@ border-radius: 50%;
                     <label class="switch">
                         <input id="activateCheckbox" type="checkbox">
                         <span class="slider"></span>
-                      </label>
+                    </label>
                 </div>
-                
+
             </div>
             <div class="settings-item">
                 <div class="settings-item-label">字体大小</div>
-                <div  class="settings-item-content">
+                <div class="settings-item-content">
                     <label id="font_size_label" for="font-size"></label>
-                    <input id="font_size_item" type="range" min="12" max="24"  id="font-size">
+                    <input id="font_size_item" type="range" min="12" max="24" id="font-size">
                 </div>
-                
+
             </div>
             <div class="settings-item">
                 <div class="settings-item-label">字体颜色</div>
                 <div class="settings-item-content">
-              
+
                     <div id="font_color_item" class="color-box">
-                        <div class="color balck" ></div>
-                        <div class="color white" ></div>
-                        <div class="color yellow" ></div>
-                        <div class="color blue" ></div>
-                        <div class="color green" ></div>
+                        <div class="color balck"></div>
+                        <div class="color white"></div>
+                        <div class="color yellow"></div>
+                        <div class="color blue"></div>
+                        <div class="color green"></div>
                     </div>
                 </div>
-                
+
             </div>
             <div class="settings-item">
                 <div class="settings-item-label">字体背景颜色</div>
                 <div class="settings-item-content">
-              
-                    <div class="color-box">
-                        <div class="color balck" ></div>
-                        <div class="color white" ></div>
-                        <div class="color yellow" ></div>
-                        <div class="color blue" ></div>
-                        <div class="color green" ></div>
+
+                    <div id="font_background_color_item" class="color-box">
+                        <div class="color balck"></div>
+                        <div class="color white"></div>
+                        <div class="color yellow"></div>
+                        <div class="color blue"></div>
+                        <div class="color green"></div>
                     </div>
-                </div>
-                
-            </div>
-            <div class="settings-item">
-                <div class="settings-item-label">透明背景</div>
-                <div class="settings-item-content">
-                    <label class="switch">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                      </label>
                 </div>
 
             </div>
-          </div>
-    </div>
-    <script src="./index.js" ></script>
+            <div class="settings-item">
+                <div class="settings-item-label">透明度</div>
+                <div class="settings-item-content">
+                    <div class="slider-container">
+                        <label id="transparency_label" for="transparency"></label>
+
+                        <input type="range" min="0" max="100" value="50" class="slider" id="transparency">
+
+                    </div>
+                    
+
+                </div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-item-label">字幕透明背景</div>
+                <div class="settings-item-content">
+                    <label class="switch">
+                        <input id="bgTransparent" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+            </div>
+        </div>
+        <script src="./index.js"></script>
 </body>
+
 </html>

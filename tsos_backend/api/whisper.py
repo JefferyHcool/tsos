@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import timedelta, datetime
 import srt
 import openai
@@ -77,10 +78,14 @@ def transcriptions(path):
 
 
 if __name__ == '__main__':
-    now=datetime.now()
-    path_to_large_audio = "../S1Fplr8nVHQ.mp3"
+    start_time = time.time()
+    path_to_large_audio = "G:\\02_个人项目\\21_字幕救星_The Savior of Subtitles\\tsos_backend\\assets\\audios\_Ticket Wars_ DEADPOOL AND WOLVERINE Premiere or a Wild Weekend in VEGAS__ First Day Sales TODAY!.mp3"
     all_subtitles = transcriptions(path_to_large_audio)
     # 结束计时
-    later = datetime.now()
-    print('Final Time:', later - now)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    # 打印结果
+    print("Transcription took %.2f seconds" % elapsed_time)
+
     print(all_subtitles)
