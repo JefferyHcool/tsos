@@ -25,10 +25,26 @@ chrome.storage.onChanged.addListener((changes, area) => {
         setBgTransparency(changes.bgTransparent.newValue);
     
     }
+    if (area === 'sync' && changes.synchronization?.newValue) {
+        console.log("同步改变：", changes.synchronization.newValue);
+        //   setDebugMode(debugMode);
+        setSynchronization(changes.synchronization.newValue);
+    }
 
 
 
 });
+
+
+function setSynchronization(value) { 
+    // 获取所有打开的标签页
+    chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+            // 向每个标签页发送消息
+            chrome.tabs.sendMessage(tab.id, { action: 'setSynchronization', value: value });
+        });
+    });
+}
 
 function setFont(font_size) {
     // 获取所有打开的标签页
