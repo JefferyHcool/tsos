@@ -83,6 +83,7 @@ function startSubtitleStream(videoUrl, lang) {
                 eventSource.onmessage = function (event) {
                     const subtitle = JSON.parse(event.data);
                     console.log('Subtitle:', subtitle);
+                    tsos_sub_container.removeChild(tempContainter);
 
                     if (flag == 0) {
                         const notification = document.querySelector('.tsos-notification');
@@ -90,7 +91,6 @@ function startSubtitleStream(videoUrl, lang) {
                             notification.style.display = 'block';
                             setTimeout(() => { notification.style.display = 'none'; }, 2000);
                             flag = -1;
-                            tsos_sub_container.removeChild(tempContainter);
                         }
                         else {
                             const notification = document.createElement('iframe');

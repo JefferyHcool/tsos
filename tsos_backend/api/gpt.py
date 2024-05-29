@@ -13,13 +13,14 @@ client = OpenAI(
 
 
 def translation(text,extra_info=None):
-
+    print('开始翻译')
     if isinstance(text, list):
         text = "\n".join(text)
 
     if extra_info:
         prompt_text=prompt+extra_info
     prompt_text=prompt
+    print(text)
     response = client.chat.completions.create(
         model="gpt-4o-2024-05-13",
         messages=[
@@ -27,4 +28,5 @@ def translation(text,extra_info=None):
             {"role": "user", "content": text}
         ]
     )
+
     return response.choices[0].message.content

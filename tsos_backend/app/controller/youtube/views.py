@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 import srt
 from dotenv import load_dotenv
@@ -30,6 +31,8 @@ def get_srt():
 
 @yt_bp.route('/get_srt_stream', methods=['GET'])
 def get_srt_stream():
+    #开始时间
+    strat_time=time.time()
     youtube = YoutubeAPI(video_url=video_url)
 
     def parse_srt(srt):
@@ -67,11 +70,18 @@ def get_srt_stream():
 
         def generate():
             for subtitle_chunk in subtitles:
+
                 subtitle_chunk=srt.compose(subtitle_chunk)
-                print(subtitle_chunk)
+                n_t = time.time()
+
                 translated_subtitles = translation(subtitle_chunk, extra_info=f'视频名称{youtube.video_info["title"]}')
+                e_t = time.time()
+                print('字幕翻译用时：', e_t - n_t, '秒')
                 subtitle_objects = parse_srt(translated_subtitles)
                 subtitle_file = youtube.save_srt_to_file(translated_subtitles)
+                end_time=time.time()
+                print('返回时间：',end_time-strat_time,'秒')
+
                 yield f"data: {json.dumps(subtitle_objects)}\n\n"
             yield "event: end\n"  # Indicate the end of the stream
             yield "data: END\n\n"
