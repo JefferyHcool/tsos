@@ -5,8 +5,14 @@ import srt
 from pydub import AudioSegment
 from dotenv import load_dotenv
 from faster_whisper import WhisperModel
-
+import torch
 model_size = "base"
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+if torch.cuda.is_available():
+    device = torch.cuda.current_device()
+    print(f"Using GPU: {torch.cuda.get_device_name(device)}")
+else:
+    print("Using CPU")
 model = WhisperModel(model_size, device="cuda", compute_type="float16")
 load_dotenv()
 
