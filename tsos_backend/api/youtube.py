@@ -11,6 +11,7 @@ from tsos_backend.api.whisper_local import transcriptions_local
 from tsos_backend.utils import sanitize_filename, split_srt
 
 load_dotenv()
+whisper_end = os.getenv('WHISPER_END', 'CLOUD')
 
 
 class YoutubeAPI:
@@ -130,12 +131,14 @@ class YoutubeAPI:
                     #     subtitle_content = self.convert_json_to_srt(subtitle_content)
 
                     audio_file = self.get_audio_from_video()
+                    if whisper_end == 'LOCAL':
+                        return transcriptions_local(audio_file)
+
                     subtitle_content = transcriptions_local(audio_file)
                     subtitle_content = srt.compose(subtitle_content)
                     print(subtitle_content)
                     split_srt(subtitle_content)
                     return subtitle_content
-
 
                 subtitle_content = None
                 if lang not in self.get_available_subtitles(video_id):

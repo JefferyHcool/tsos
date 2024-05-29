@@ -26,11 +26,21 @@ def transcriptions_local(file_name):
     segments, info = model.transcribe(file_name, beam_size=5)
 
     subtitles = []
+    max_len=12
+    temp_list=[]
     # subtitles = list(segments)  # 转录将在此处实际运行。
     for i, segment in enumerate(segments):
         start = timedelta(seconds=segment.start)
         end = timedelta(seconds=segment.end)
+        temp_list.append(srt.Subtitle(index=i+1, start=start, end=end, content=segment.text))
+        if(len(temp_list)>=max_len):
+            c=temp_list.copy()
+            temp_list=[]
+            yield c
+
         subtitles.append(srt.Subtitle(index=i+1, start=start, end=end, content=segment.text))
+
+
     end_time = time.time()
     elapsed_time = end_time - start_time
     # 打印结果
