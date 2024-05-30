@@ -28,5 +28,5 @@ def translation(text,extra_info=None):
             {"role": "user", "content": text}
         ]
     )
-
+    print(response.choices[0].message.content)
     return response.choices[0].message.content

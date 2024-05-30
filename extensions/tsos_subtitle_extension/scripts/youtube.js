@@ -56,6 +56,7 @@ function onMouseUp() {
 }
 function startSubtitleStream(videoUrl, lang) {
     let flag = 0;
+    let temp = 0;
     const loading = document.createElement('div');
     const tempContainter = document.createElement('div');
     const p = document.createElement('p');
@@ -79,11 +80,15 @@ function startSubtitleStream(videoUrl, lang) {
         .then(response => {
             if (response.ok) {
                 const eventSource = new EventSource('http://127.0.0.1:5000/youtube/get_srt_stream');
-
+                
                 eventSource.onmessage = function (event) {
+                    console.log("返回的数据",event);
                     const subtitle = JSON.parse(event.data);
                     console.log('Subtitle:', subtitle);
-                    tsos_sub_container.removeChild(tempContainter);
+                    if (temp==0) {
+                        tsos_sub_container.removeChild(tempContainter);
+                        temp=1
+                    }
 
                     if (flag == 0) {
                         const notification = document.querySelector('.tsos-notification');
