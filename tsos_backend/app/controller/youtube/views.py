@@ -1,6 +1,7 @@
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import srt
 from dotenv import load_dotenv
@@ -69,23 +70,42 @@ def get_srt_stream():
         subtitles = youtube.get_subtitles(lang=lang)
 
         def generate():
-            for subtitle_chunk in subtitles:
+            start_time = time.time()  # 初始化开始时间
 
-                subtitle_chunk=srt.compose(subtitle_chunk)
-                n_t = time.time()
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                extra_info = f'视频名称: {youtube.video_info["title"]}'
+                futures = [executor.submit(translation, srt.compose(subtitle), extra_info) for subtitle in subtitles]
 
-                translated_subtitles = translation(subtitle_chunk, extra_info=f'视频名称{youtube.video_info["title"]}')
-                e_t = time.time()
-                print('字幕翻译用时：', e_t - n_t, '秒')
-                subtitle_objects = parse_srt(translated_subtitles)
-                subtitle_file = youtube.save_srt_to_file(translated_subtitles)
-                end_time=time.time()
-                print('返回时间：',end_time-strat_time,'秒')
+                try:
+                    for future in futures:
+                        subtitle_objects = future.result()  # 等待翻译完成
+                        subtitle_objects = parse_srt(subtitle_objects)
+                        end_time = time.time()
+                        print('总返回时间：', end_time - start_time, '秒')
+                        yield f"data: {json.dumps(subtitle_objects)}\n\n"
+                except Exception as e:
+                    print(f"Error processing translation: {e}")
+                    # app.logger.error(f"Error processing translation: {e}")  # 错误日志
+                    yield f"data: {{'error': '{str(e)}'}}\n\n"
 
-                yield f"data: {json.dumps(subtitle_objects)}\n\n"
             yield "event: end\n"  # Indicate the end of the stream
             yield "data: END\n\n"
 
+            # for subtitle_chunk in subtitles:
+            #         subtitle_text = srt.compose(subtitle_chunk)  # 将字幕片段组合成文本
+            #     translation_start = time.time()
+            #
+            #     translated_subtitles = translation(subtitle_text, )
+            #
+            #     translation_end = time.time()
+            #     print('字幕翻译用时：', translation_end - translation_start, '秒')
+            #
+            #     subtitle_objects = srt.parse(translated_subtitles)  # 解析翻译后的字幕
+            #     subtitle_file = youtube.save_srt_to_file(translated_subtitles)  # 存储翻译后的字幕
+
+
+
+            
         return Response(stream_with_context(generate()), mimetype='text/event-stream')
 
     else:
