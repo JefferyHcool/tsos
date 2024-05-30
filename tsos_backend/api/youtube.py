@@ -35,51 +35,43 @@ class YoutubeAPI:
             }]
         })
         self.video_info = self.get_video_info()
+        self.audio_info = self.get_audio_info()
+
+    def get_audio_info(self):
+        if self.video_info:
+            formats = self.video_info.get('formats', [])
+            for f in formats:
+                if f.get('acodec') != 'none':
+                    return f
+        return None
 
     def check_str_exist(self, video_id=None, lang='en'):
-        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
-        with self.ydl as ydl:
-            try:
-                result = ydl.extract_info(url, download=False)
-                if 'subtitles' in result:
-                    subtitles = result['subtitles']
-                    if lang in subtitles:
-                        return True
-                if 'automatic_captions' in result:
-                    automatic_captions = result['automatic_captions']
-                    if lang in automatic_captions:
-                        return True
-                return False
-            except yt_dlp.utils.DownloadError as e:
-                print(f"Error: {e}")
-                return False
+        if self.video_info:
+            if 'subtitles' in self.video_info:
+                subtitles = self.video_info['subtitles']
+                if lang in subtitles:
+                    return True
+            if 'automatic_captions' in self.video_info:
+                automatic_captions = self.video_info['automatic_captions']
+                if lang in automatic_captions:
+                    return True
+        return False
 
     def list_available_subtitles(self, video_id=None):
-        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
-        ydl_opts = {
-            'listsubtitles': True,
-            'skip_download': True,
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            subtitles = info.get('subtitles', {})
+        if self.video_info:
+            subtitles = self.video_info.get('subtitles', {})
             return subtitles
+        return {}
 
     def get_available_subtitles(self, video_id=None):
-        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
-        with self.ydl as ydl:
-            try:
-                result = ydl.extract_info(url, download=False)
-                available_subtitles = {}
-                if 'subtitles' in result:
-                    available_subtitles.update(result['subtitles'])
-                if 'automatic_captions' in result:
-                    available_subtitles.update(result['automatic_captions'])
-
-                return list(available_subtitles.keys())
-            except yt_dlp.utils.DownloadError as e:
-                print(f"Error: {e}")
-                return []
+        if self.video_info:
+            available_subtitles = {}
+            if 'subtitles' in self.video_info:
+                available_subtitles.update(self.video_info['subtitles'])
+            if 'automatic_captions' in self.video_info:
+                available_subtitles.update(self.video_info['automatic_captions'])
+            return list(available_subtitles.keys())
+        return []
 
     def get_video_info(self, video_id=None):
         url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
@@ -92,77 +84,49 @@ class YoutubeAPI:
                 return None
 
     def get_subtitle_type(self, video_id=None):
-        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
-        ydl_opts = {
-            'skip_download': True,
-            'list_subs': True
-        }
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            try:
-                info_dict = ydl.extract_info(url, download=False)
-                subtitles = info_dict.get('subtitles', {})
-
-                subtitle_types = set()
-                for lang, subs in subtitles.items():
-                    for sub in subs:
-                        ext = sub.get('ext')
-                        if ext:
-                            subtitle_types.add(ext)
-
-                return subtitle_types
-
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                return None
+        if self.video_info:
+            subtitles = self.video_info.get('subtitles', {})
+            subtitle_types = set()
+            for lang, subs in subtitles.items():
+                for sub in subs:
+                    ext = sub.get('ext')
+                    if ext:
+                        subtitle_types.add(ext)
+            return subtitle_types
+        return None
 
     def get_subtitles(self, lang=None, video_id=None):
-        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
-
-        with self.ydl as ydl:
-            try:
-                result = ydl.extract_info(url, download=False)
-
-                if lang is None:
-                    print('语言识别')
-                    # if 'subtitles' in result and lang in result['subtitles']:
-                    #     subtitle_url = result['subtitles'][lang][0]['url']
-                    #     subtitle_content = ydl.urlopen(subtitle_url).read().decode('utf-8')
-                    #     subtitle_content = self.convert_json_to_srt(subtitle_content)
-
-                    audio_file = self.get_audio_from_video()
-                    if whisper_end == 'LOCAL':
-                        return transcriptions_local(audio_file)
-
-                    subtitle_content = transcriptions_local(audio_file)
-                    subtitle_content = srt.compose(subtitle_content)
-                    print(subtitle_content)
-                    split_srt(subtitle_content)
-                    return subtitle_content
-
-                subtitle_content = None
-                if lang not in self.get_available_subtitles(video_id):
-                    if 'automatic_captions' in result and lang in result['automatic_captions']:
-                        print("获取自动生成的字幕")
-                        auto_caption_url = result['automatic_captions'][lang][0]['url']
-                        subtitle_content = ydl.urlopen(auto_caption_url).read().decode('utf-8')
-                        subtitle_content = self.convert_json_to_srt(subtitle_content)
-                    else:
-                        self.get_audio_from_video()
-                        return None
-                else:
-                    if 'subtitles' in result and lang in result['subtitles']:
-                        subtitle_url = result['subtitles'][lang][0]['url']
-                        subtitle_content = ydl.urlopen(subtitle_url).read().decode('utf-8')
-                        subtitle_content = self.convert_json_to_srt(subtitle_content)
-                    else:
-                        subtitle_content = None
-
+        if self.video_info:
+            if lang is None:
+                print('语言识别')
+                audio_file = self.get_audio_from_video()
+                if whisper_end == 'LOCAL':
+                    return transcriptions_local(audio_file)
+                subtitle_content = transcriptions_local(audio_file)
+                subtitle_content = srt.compose(subtitle_content)
+                print(subtitle_content)
+                split_srt(subtitle_content)
                 return subtitle_content
-            except yt_dlp.utils.DownloadError as e:
-                print(f"Error: {e}")
-                return None
 
+            subtitle_content = None
+            if lang not in self.get_available_subtitles(video_id):
+                if 'automatic_captions' in self.video_info and lang in self.video_info['automatic_captions']:
+                    print("获取自动生成的字幕")
+                    auto_caption_url = self.video_info['automatic_captions'][lang][0]['url']
+                    subtitle_content = self.ydl.urlopen(auto_caption_url).read().decode('utf-8')
+                    subtitle_content = self.convert_json_to_srt(subtitle_content)
+                else:
+                    self.get_audio_from_video()
+                    return None
+            else:
+                if 'subtitles' in self.video_info and lang in self.video_info['subtitles']:
+                    subtitle_url = self.video_info['subtitles'][lang][0]['url']
+                    subtitle_content = self.ydl.urlopen(subtitle_url).read().decode('utf-8')
+                    subtitle_content = self.convert_json_to_srt(subtitle_content)
+                else:
+                    subtitle_content = None
+            return subtitle_content
+        return None
     def format_time(self, seconds):
         ms = int((seconds % 1) * 1000)
         seconds = int(seconds)
@@ -192,33 +156,33 @@ class YoutubeAPI:
                 return None
 
     def get_audio_from_video(self, video_id=None):
-        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
-        export_path = self.base_path + '/audios/'
-        if not os.path.exists(export_path):
-            os.makedirs(os.path.dirname(export_path))
+        if self.audio_info:
+            url = self.audio_info['url']
+            export_path = self.base_path + '/audios/'
+            if not os.path.exists(export_path):
+                os.makedirs(os.path.dirname(export_path))
 
-        export_path = export_path + sanitize_filename(f"{self.video_info['title']}")
-        ydl_opts = {
-            'proxy': self.proxy,
-            'format': 'bestaudio/best',
-            'outtmpl': export_path,
-            'nooverwrites': True,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            try:
-                result = ydl.extract_info(url, download=True)
-                audio_file = ydl.prepare_filename(result).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-                print(audio_file)
-                return audio_file + '.mp3'
-            except yt_dlp.utils.DownloadError as e:
-                print(f"Error: {e}")
-                return None
-
+            export_path = export_path + sanitize_filename(f"{self.video_info['title']}")
+            ydl_opts = {
+                'proxy': self.proxy,
+                'outtmpl': export_path,
+                'nooverwrites': True,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }],
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                try:
+                    result = ydl.extract_info(url, download=True)
+                    audio_file = ydl.prepare_filename(result).replace('.webm', '.mp3').replace('.m4a', '.mp3')
+                    print(audio_file)
+                    return audio_file+'.mp3'
+                except yt_dlp.utils.DownloadError as e:
+                    print(f"Error: {e}")
+                    return None
+        return None
     def format_time_json(self, td):
         hours, remainder = divmod(td.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)

@@ -37,6 +37,9 @@ def transcriptions_local(file_name):
             c=temp_list.copy()
             temp_list=[]
             yield c
+        if(len(temp_list)>0):
+
+            yield temp_list
 
         subtitles.append(srt.Subtitle(index=i+1, start=start, end=end, content=segment.text))
 
