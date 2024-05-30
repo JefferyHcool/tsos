@@ -156,33 +156,32 @@ class YoutubeAPI:
                 return None
 
     def get_audio_from_video(self, video_id=None):
-        if self.audio_info:
-            url = self.audio_info['url']
-            export_path = self.base_path + '/audios/'
-            if not os.path.exists(export_path):
-                os.makedirs(os.path.dirname(export_path))
+        url = f"https://www.youtube.com/watch?v={video_id or self.video_id}"
+        export_path = self.base_path + '/audios/'
+        if not os.path.exists(export_path):
+            os.makedirs(os.path.dirname(export_path))
 
-            export_path = export_path + sanitize_filename(f"{self.video_info['title']}")
-            ydl_opts = {
-                'proxy': self.proxy,
-                'outtmpl': export_path,
-                'nooverwrites': True,
-                'postprocessors': [{
-                    'key': 'FFmpegExtractAudio',
-                    'preferredcodec': 'mp3',
-                    'preferredquality': '192',
-                }],
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                try:
-                    result = ydl.extract_info(url, download=True)
-                    audio_file = ydl.prepare_filename(result).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-                    print(audio_file)
-                    return audio_file+'.mp3'
-                except yt_dlp.utils.DownloadError as e:
-                    print(f"Error: {e}")
-                    return None
-        return None
+        export_path = export_path + sanitize_filename(f"{self.video_info['title']}")
+        ydl_opts = {
+            'proxy': self.proxy,
+            'format': 'bestaudio/best',
+            'outtmpl': export_path,
+            'nooverwrites': True,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '64',
+            }],
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            try:
+                result = ydl.extract_info(url, download=True)
+                audio_file = ydl.prepare_filename(result).replace('.webm', '.mp3').replace('.m4a', '.mp3')
+                print(audio_file)
+                return audio_file + '.mp3'
+            except yt_dlp.utils.DownloadError as e:
+                print(f"Error: {e}")
+                return None
     def format_time_json(self, td):
         hours, remainder = divmod(td.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)

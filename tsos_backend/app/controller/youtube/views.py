@@ -72,7 +72,7 @@ def get_srt_stream():
         def generate():
             start_time = time.time()  # 初始化开始时间
 
-            with ThreadPoolExecutor(max_workers=5) as executor:
+            with ThreadPoolExecutor(max_workers=10) as executor:
                 extra_info = f'视频名称: {youtube.video_info["title"]}'
                 futures = [executor.submit(translation, srt.compose(subtitle), extra_info) for subtitle in subtitles]
 
