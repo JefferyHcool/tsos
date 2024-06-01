@@ -20,13 +20,11 @@ def translation(text,extra_info=None):
     if extra_info:
         prompt_text=prompt+extra_info
     prompt_text=prompt
-    print(text)
     response = client.chat.completions.create(
-        model="gpt-4o-2024-05-13",
+        model="gpt-3.5-turbo-16k",
         messages=[
             {"role": "system", "content": prompt_text},
             {"role": "user", "content": text}
         ]
     )
-    print(response.choices[0].message.content)
     return response.choices[0].message.content

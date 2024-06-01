@@ -82,6 +82,7 @@ def get_srt_stream():
                         subtitle_objects = parse_srt(subtitle_objects)
                         end_time = time.time()
                         print('总返回时间：', end_time - start_time, '秒')
+
                         yield f"data: {json.dumps(subtitle_objects)}\n\n"
                 except Exception as e:
                     print(f"Error processing translation: {e}")

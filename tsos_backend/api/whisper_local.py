@@ -43,7 +43,6 @@ def transcriptions_local(file_name):
 
         subtitles.append(srt.Subtitle(index=i+1, start=start, end=end, content=segment.text))
 
-
     end_time = time.time()
     elapsed_time = end_time - start_time
     # 打印结果
